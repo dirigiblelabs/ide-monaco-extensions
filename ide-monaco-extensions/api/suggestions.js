@@ -14,7 +14,7 @@ suggestions
             f.fqn = e.name + "." + f.name
         });
         secondLevelSuggestions = secondLevelSuggestions.concat(e.returnType.functions);
-    })
+    });
 
 suggestions = suggestions.concat(secondLevelSuggestions);
 
