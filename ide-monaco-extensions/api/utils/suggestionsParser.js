@@ -1,4 +1,4 @@
-var contentManager = require("repository/v4/content");
+var contentManager = require("platform/v4/registry");
 var acorn = require("acornjs/acorn");
 
 String.prototype.replaceAll = function(search, replacement) {
