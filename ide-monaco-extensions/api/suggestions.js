@@ -9,52 +9,36 @@ const PATH_REGISTRY_PUBLIC = "/registry/public";
 const MODULE_INFO_PREFIX = "MODULE_INFO_";
 
 let moduleName = request.getParameter("moduleName");
-let info = loadModulesInfo();
+let moduleInfo = loadModuleInfo(moduleName);
 
-let suggestions = info[moduleName];
-if (!suggestions) {
-    let modules = modulesParser.getModules();
-    modules.forEach(e => {
-        try {
-            let resource = repository.getResource(`${PATH_REGISTRY_PUBLIC}/${e.name}.js`);
-            let information = resource.getInformation();
-            let lastModifiedAt = information.getModifiedAt().getTime();
-            if (!info[e.name] || (info[e.name].lastModifiedAt < lastModifiedAt)) {
-                info[e.name] = {
-                    lastModifiedAt: lastModifiedAt,
-                    suggestions: suggestionsParser.parse(e.name)
-                }
-            }
-        } catch(e) {
-            console.error(`Error occured ${e}`);
+try {
+    let resource = repository.getResource(`${PATH_REGISTRY_PUBLIC}/${moduleName}.js`);
+    let information = resource.getInformation();
+    let lastModifiedAt = information.getModifiedAt().getTime();
+    if (isEmptyObject(moduleInfo) || moduleInfo.lastModifiedAt < lastModifiedAt) {
+        moduleInfo = {
+            moduleName: moduleName,
+            lastModifiedAt: lastModifiedAt,
+            suggestions: suggestionsParser.parse(moduleName)
         }
-    });
-    saveModulesInfo(info);
-    suggestions = info[moduleName];
+        saveModuleInfo(moduleInfo);
+    }
+} catch (e) {
+    console.error(`Error occured ${e}`);
 }
 
-response.print(JSON.stringify(suggestions));
+response.print(JSON.stringify(moduleInfo.suggestions));
 response.flush();
 response.close();
 
-function loadModulesInfo() {
-    let modulesInfo = {};
-    let keys = config.getKeys();
-    let configKeys = [];
-    for (let i = 0 ; i < keys.length; i ++) {
-        configKeys.push(keys[i]);
-    }
-    let modules = configKeys.filter(e => e.startsWith(MODULE_INFO_PREFIX));
-    modules.forEach(e => {
-        let moduleId = e.substring(MODULE_INFO_PREFIX.length);
-        modulesInfo[moduleId] = JSON.parse(config.get(e));
-    });
-    return modulesInfo;
+function loadModuleInfo(moduleName) {
+    return JSON.parse(config.get(MODULE_INFO_PREFIX + moduleName, "{}"));
 }
 
-function saveModulesInfo(modulesInfo) {
-    for (let next in modulesInfo) {
-        let moduleData = JSON.stringify(modulesInfo[next]);
-        config.set(`${MODULE_INFO_PREFIX}${next}`, moduleData)
-    }
+function saveModuleInfo(moduleInfo) {
+    config.set(`${MODULE_INFO_PREFIX}${moduleInfo.moduleName}`, JSON.stringify(moduleInfo));
+}
+
+function isEmptyObject(obj) {
+    return obj && Object.keys(obj).length === 0 && obj.constructor === Object
 }
