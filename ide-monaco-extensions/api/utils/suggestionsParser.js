@@ -72,7 +72,7 @@ function addTransformedFunction(transformedFunctions, objectName, func) {
 
     transformedFunctions[objectName][functionId] = func;
     let documentation;
-    if (func.documentation) {
+    if (func.documentation && !isEmptyObject(func.documentation)) {
         documentation = func.documentation.value;
     } else {
         documentation = transformedFunctions[objectName][functionId].definition;
@@ -91,13 +91,22 @@ function getDocumentation(func, comments) {
 }
 
 function getReturnType(func) {
-    let returnType = "void";
     if (func.expression && func.expression.right && func.expression.right.body && func.expression.right.body.body) {
+        let returnType = "void";
         let returnStatement = func.expression.right.body.body.filter(e => e.type === "ReturnStatement")[0];
-        if (returnStatement && returnStatement.argument && returnStatement.argument.type === "NewExpression") {
-            // Do something
-            returnType = returnStatement.argument.callee.name;
-            console.error(JSON.stringify(returnType));
+        if (returnStatement && returnStatement.argument) {
+            switch(returnStatement.argument.type) {
+                case "NewExpression":
+                    returnType = returnStatement.argument.callee.name;
+                    break;
+                case "Identifier":
+                    let identifierName = returnStatement.argument.entity;
+                    let returnObject = func.expression.right.body.body.filter(e => e.type === "VariableDeclaration" && e.declarations[0].name === identifierName)[0];
+                    if (returnObject.declarations[0].init && returnObject.declarations[0].init.type === "NewExpression") {
+                        returnType = returnObject.declarations[0].init.callee.name
+                    }
+                    break;
+            }
         }
         return returnType;
     }
@@ -105,4 +114,8 @@ function getReturnType(func) {
 
 function formatDocumentation(documentation) {
     return documentation ? documentation.replaceAll("\\*", "") : documentation;
+}
+
+function isEmptyObject(obj) {
+    return obj && Object.keys(obj).length === 0 && obj.constructor === Object
 }
