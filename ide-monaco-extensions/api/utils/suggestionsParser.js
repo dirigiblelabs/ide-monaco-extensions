@@ -1,6 +1,8 @@
 var contentManager = require("platform/v4/registry");
 var acorn = require("acornjs/acorn");
 
+const COMMENTS_OFFSET_LENGTH = 12;
+
 String.prototype.replaceAll = function(search, replacement) {
     return this.replace(new RegExp(search, 'g'), replacement);
 };
@@ -86,7 +88,15 @@ function getParams(func) {
 }
 
 function getDocumentation(func, comments) {
-    let selectedComments = comments.filter(e => e.end < func.expression.start && e.end + 12 >= func.expression.start);
+    let selectedComments = comments.filter(e => {
+        let matches = false;
+        if (e.type === "Block") {
+            matches = e.start > 0 // skip the first "Header/License" comment
+                && e.end < func.expression.start 
+                && e.end + COMMENTS_OFFSET_LENGTH >= func.expression.start;
+        }
+        return matches;
+    });
     return selectedComments && selectedComments.length > 0 ? selectedComments[selectedComments.length - 1] : {}
 }
 
