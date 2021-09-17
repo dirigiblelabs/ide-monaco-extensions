@@ -1,5 +1,5 @@
-var response = require("http/v4/response");
-var modulesParser = require("ide-monaco-extensions/api/utils/modulesParser");
+let response = require("http/v4/response");
+let modulesParser = require("ide-monaco-extensions/api/utils/modulesParser");
 
 let modules = modulesParser.getModules();
 
