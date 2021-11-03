@@ -10,11 +10,9 @@
  * SPDX-License-Identifier: EPL-2.0
  */
 let response = require("http/v4/response");
-let request = require("http/v4/request");
-let moduleInfoCache = require("ide-monaco-extensions/api/utils/moduleInfoCache");
+let dtsParser = require("ide-monaco-extensions/api/utils/dtsParser");
 
-let moduleInfo = moduleInfoCache.get(request.getParameter("moduleName"));
+let dtsPaths = dtsParser.getDtsPaths();
+let dtsContent = dtsParser.getDtsFileContents(dtsPaths);
 
-response.print(JSON.stringify(moduleInfo.suggestions));
-response.flush();
-response.close();
+response.println(dtsContent);
