@@ -59,12 +59,13 @@ function isIgnoredModulePath(path) {
         || path.startsWith("http/") // Ignore system JavaScript API packages
         || path.startsWith("utils/") // Ignore system JavaScript API packages
         || path.startsWith("bpm/") // Ignore system JavaScript API packages
-        || path.startsWith("bpm/") // Ignore system JavaScript API packages
+        || path.startsWith("git/") // Ignore system JavaScript API packages
         || path.startsWith("log/") // Ignore system JavaScript API packages
         || path.startsWith("db/") // Ignore system JavaScript API packages
         || path.startsWith("security/") // Ignore system JavaScript API packages
         || path.startsWith("security/") // Ignore system JavaScript API packages
         || path.startsWith("cassandra/") // Ignore system JavaScript API packages
+
 
         || path.startsWith("template-application-") // Ignore application templates
 
